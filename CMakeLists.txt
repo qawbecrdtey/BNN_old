@@ -3,4 +3,4 @@ project(BNN)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(BNN main.cpp LinearAlgebra/Matrix.hpp)
+add_executable(BNN main.cpp LinearAlgebra/Matrix.hpp Net/NeuralNet.hpp)
