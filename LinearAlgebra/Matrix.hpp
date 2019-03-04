@@ -35,13 +35,14 @@ namespace LinearAlgebra {
 
         // move constructor
         Matrix(Matrix const &matrix)
-                : row(matrix.row), col(matrix.col), mat(new T[row * col]) {
-            std::copy(matrix.mat, matrix.mat + row * col, mat);
+                : row(matrix.row), col(matrix.col), mat(new T[matrix.row * matrix.col]) {
+            std::copy(matrix.mat, matrix.mat + matrix.row * matrix.col, mat);
         }
 
         // copy constructor
         Matrix(Matrix &&matrix) noexcept
                 : row(matrix.row), col(matrix.col), mat(matrix.mat) {
+            delete[] matrix.mat;
             matrix.mat = nullptr;
         }
 
@@ -60,7 +61,6 @@ namespace LinearAlgebra {
         Matrix &operator=(Matrix &&matrix) noexcept {
             row = matrix.row, col = matrix.col;
             std::swap(mat, matrix.mat);
-            delete[] matrix.mat;
             return *this;
         }
 

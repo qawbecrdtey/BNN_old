@@ -7,9 +7,9 @@ int main() {
 	using NN = Net::NeuralNet<double>;
 	using nnint = std::size_t;
 
-	constexpr nnint SIZE = 5;
+	constexpr nnint SIZE = 4;
 	constexpr nnint testcase_num = 1<<SIZE;
-	constexpr nnint layer_count = 3;
+	constexpr nnint layer_count = 5;
     constexpr nnint output_size = SIZE + (SIZE > 1 ? 2 : 3);
 
 	auto *input = new Matrix[testcase_num];
@@ -29,13 +29,13 @@ int main() {
         else {
             tmp = i / 2;
         }
-        for(nnint r = 0; r < SIZE; r++) {
+        for(nnint r = 0; r < output_size; r++) {
             output[i](r, 0) = tmp & 1;
             tmp >>= 1;
         }
     }
 
-    nnint layer_size[layer_count]{SIZE, SIZE + layer_count, output_size};
+    nnint layer_size[layer_count]{SIZE, SIZE + 3, SIZE + 4, SIZE + 3, output_size};
 
     NN nn(layer_count,
           layer_size,
@@ -94,7 +94,7 @@ int main() {
           0.001
     );
 
-    for(nnint i = 0; i < 30; i++) {
+    for(nnint i = 0; i < 500; i++) {
         nn.learn(testcase_num, input, output);
     }
 
