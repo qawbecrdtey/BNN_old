@@ -20,13 +20,26 @@ namespace LinearAlgebra {
         // constructors
         Matrix() : row(0), col(0), mat(nullptr) {}
 
-        Matrix(std::size_t row, std::size_t col)
+        // TODO : PLEASE USE STATIC CONSTRUCTORS. Below is the example.
+        static Matrix<T> Constant(std::size_t row, std::size_t col, T constant) {
+            Matrix<T> M(row, col);
+            std::fill(M.mat, M.mat + row * col, constant);
+            return M;
+        }
+        static Matrix<T> Zeros(std::size_t row, std::size_t col) {
+            return Constant(row, col, static_cast<T>(0));
+        }
+        static Matrix<T> Ones(std::size_t row, std::size_t col) {
+            return Constant(row, col, static_cast<T>(1));
+        }
+
+        Matrix(std::size_t row, std::size_t col) // TODO : This is default constructor, NOT random matrix generator
                 : row(row), col(col), mat(new T[row * col]) {
             assert(row != 0 && col != 0);
             std::random_device r;
 
             std::default_random_engine e1(r());
-            std::uniform_real_distribution<T> uniform_dist(0, 2);
+            std::normal_distribution<T> uniform_dist(0, 0.3); // TODO : I think random generator is a choice of clients
             for(std::size_t i = 0; i < row * col; i++) {
                 mat[i] = (T)uniform_dist(e1);
             }
@@ -49,15 +62,16 @@ namespace LinearAlgebra {
             }
         }
 
-        // move constructor
+        // copy constructor
         Matrix(Matrix const &matrix)
                 : row(matrix.row), col(matrix.col), mat(new T[matrix.row * matrix.col]) {
             std::copy(matrix.mat, matrix.mat + matrix.row * matrix.col, mat);
         }
 
-        // copy constructor
+        // move constructor
         Matrix(Matrix &&matrix) noexcept
                 : row(matrix.row), col(matrix.col), mat(matrix.mat) {
+            matrix.mat = nullptr;
         }
 
         // copy assignment
@@ -120,10 +134,11 @@ namespace LinearAlgebra {
 
         virtual Matrix multiply(Matrix const &matrix) const {
             assert(col == matrix.row);
-            Matrix<T> M(row, matrix.col);
+            //Matrix<T> M(row, matrix.col, static_cast<T>(0));
+            auto M = Matrix<T>::Zeros(row, matrix.col);
             for (std::size_t i = 0; i < row; i++) {
-                for (std::size_t k = 0; k < matrix.col; k++) {
-                    for (std::size_t j = 0; j < col; j++) {
+                for (std::size_t j = 0; j < col; j++) {
+                    for (std::size_t k = 0; k < matrix.col; k++) {
                         M.mat[i * matrix.col + k] += mat[i * col + j] * matrix.mat[j * matrix.col + k];
                     }
                 }
@@ -266,7 +281,7 @@ namespace LinearAlgebra {
             }
             return M;
         }
-        virtual Matrix &transpose() {
+        [[deprecated]] virtual Matrix &transpose() {
             return *this = this->transposed();
         }
 

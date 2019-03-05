@@ -68,7 +68,18 @@ int main() {
               return M;
           },
           // outer_function
-          [](Matrix matrix) -> Matrix { return matrix; },
+          //[](Matrix matrix) -> Matrix { return matrix; },
+          [](Matrix matrix) -> Matrix {
+              const nnint row = matrix.get_row();
+              const nnint col = matrix.get_col();
+              Matrix M(row, col);
+              for(nnint i = 0; i < row; i++) {
+                  for(nnint j = 0; j < col; j++) {
+                      M(i, j) = 1. / (1. + exp(-matrix(i, j)));
+                  }
+              }
+              return M;
+            },
           // dinner_function
           [](Matrix matrix) -> Matrix {
                 const nnint row = matrix.get_row();
@@ -92,7 +103,7 @@ int main() {
                 Matrix M(row, col);
                 for(nnint i = 0; i < row; i++) {
                     for(nnint j = 0; j < col; j++) {
-                        M(i, j) = (matrix(i, j) > 0 ? 1 : (matrix(i, j) == 0 ? 0.5 : 0));
+                        M(i, j) = (matrix(i, j) > 0);
                     }
                 }
                 return M;
@@ -112,8 +123,8 @@ int main() {
           0.003
     );
 
-    for(nnint i = 0; i < 10; i++) {
-        nn.learn(testcase_num, input, output);
+    for(nnint i = 0; i < 500; i++) {
+        std::cout << i << " : " << nn.learn(testcase_num, input, output) << '\n';
     }
 
     for(nnint i = 0; i < testcase_num; i++) {

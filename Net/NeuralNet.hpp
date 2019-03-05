@@ -9,11 +9,12 @@ namespace Net {
     template<typename T>
     class NeuralNet {
         using Matrix = LinearAlgebra::Matrix<T>;
-        using FunctionType = std::function<Matrix(Matrix)>;
+        using FunctionType = std::function<Matrix(Matrix)>; // TODO : Please avoid "Pass-by-Value". Too much overhead.
         using nnint = std::size_t;
 
         // (input, hidden and output) layers, weights, layers before passing activation function
         Matrix *layers, *weights, *z;
+        Matrix *wm, *bm; // TODO : How about separating NN and optimizers?
 
         // bias for each layer except the output
         Matrix *bias;
@@ -43,20 +44,23 @@ namespace Net {
                 weights[i] = Matrix(layer_size[i], layer_size[i + 1]);
                 z[i] = Matrix(layer_size[i + 1], 1);
                 bias[i] = Matrix(layer_size[i + 1], 1);
+
+                wm[i] = weights[i];
+                bm[i] = bias[i];
             }
         }
 
         // forward propagation
         virtual void forward(Matrix input) {
             assert(input.get_row() == layer_size[0] && input.get_col() == 1);
-            std::cout << "FORWARD : input is :\n" << input << '\n';
+            //std::cout << "FORWARD : input is :\n" << input << '\n';
             layers[0] = input;
             for (nnint i = 0; i < layers_count - 2; i++) {
                 layers[i + 1] = inner_function(z[i] = (weights[i].transposed() * layers[i] + bias[i]));
             }
             layers[layers_count - 1] = outer_function(
                     z[layers_count - 2] = (weights[layers_count - 2].transposed() * layers[layers_count - 2] + bias[layers_count - 2]));
-            std::cout << "FORWARD : output is :\n" << layers[layers_count - 1] << '\n';
+            //std::cout << "FORWARD : output is :\n" << layers[layers_count - 1] << '\n';
         }
 
         // get the result of forward propagation
@@ -66,11 +70,19 @@ namespace Net {
 
         // error function
         virtual T const error(Matrix trueValue) const {
-            T sum = 0;
+            /*T sum = 0;
             for (nnint i = 0; i < layer_size[layers_count - 1]; i++) {
                 sum += (layers[layers_count - 1](i, 0) - trueValue(i, 0)) * (layers[layers_count - 1](i, 0) - trueValue(i, 0));
             }
-            return sum / 2;
+            return sum / 2;*/
+            // TODO : error function must be a choice of clients!
+            T ret = 0;
+            for (nnint i = 0; i < layer_size[layers_count - 1]; i++) {
+                T t = trueValue(i, 0);
+                T y = layers[layers_count-1](i, 0);
+                ret += (t-1) * log(1 - y) - t * log(y);
+            }
+            return ret;
         }
 
         //derivative of error function
@@ -82,12 +94,17 @@ namespace Net {
         virtual void backward(Matrix trueValue) {
             Matrix delta = elementwise_multiplied(derror(trueValue), douter_function(z[layers_count - 2]));
             for (nnint i = layers_count - 2; i > 0; i--) {
-                weights[i] -= (alpha * layers[i]) * delta.transposed();
-                bias[i] -= alpha * delta;
+                wm[i] = (wm[i] * 0.9) + (layers[i] * delta.transposed());
+                bm[i] = (bm[i] * 0.9) + (delta);
+
+                weights[i] -= alpha * wm[i];
+                bias[i] -= alpha * bm[i];
                 delta = elementwise_multiplied(weights[i] * delta, dinner_function(z[i - 1]));
             }
-            weights[0] -= alpha * layers[0] * delta.transposed();
-            bias[0] -= alpha * delta;
+            wm[0] = (wm[0] * 0.9) + (layers[0] * delta.transposed());
+            bm[0] = (bm[0] * 0.9) + (delta);
+            weights[0] -= alpha * wm[0];
+            bias[0] -= alpha * bm[0];
         }
 
     public:
@@ -100,7 +117,7 @@ namespace Net {
                   dinner_function(dinner_function), douter_function(douter_function),
                   layers(new Matrix[layers_count]), weights(new Matrix[layers_count - 1]),
                   z(new Matrix[layers_count - 1]), bias(new Matrix[layers_count - 1]),
-                  alpha(alpha) {
+                  alpha(alpha), wm(new Matrix[layers_count - 1]), bm(new Matrix[layers_count - 1]) {
             init(layer_size);
         }
 
@@ -114,17 +131,20 @@ namespace Net {
         NeuralNet &operator=(NeuralNet &&) = delete;
 
         // learn
-        void learn(nnint test_case_count, Matrix *input, Matrix *answer) {
+        T learn(nnint test_case_count, Matrix *input, Matrix *answer) {
+            T ret = 0;
             for (nnint i = 0; i < test_case_count; i++) {
                 forward(input[i]);
-                std::cout << "weights and bias :\n";
+                //std::cout << "weights and bias :\n";
                 for(nnint j = 0; j < layers_count - 1; j++) {
-                    std::cout << '#' << j + 1 <<'\n';
-                    std::cout << weights[j] << '\n';
-                    std::cout << bias[j] << '\n';
+                    //std::cout << '#' << j + 1 <<'\n';
+                    //std::cout << weights[j] << '\n';
+                    //std::cout << bias[j] << '\n';
                 }
                 backward(answer[i]);
+                ret += error(answer[i]);
             }
+            return ret / test_case_count;
         }
 
         // print
@@ -139,8 +159,11 @@ namespace Net {
         virtual ~NeuralNet() {
             delete[] layers;
             delete[] weights;
+            delete[] bias;
             delete[] z;
             delete[] layer_size;
+            delete[] wm;
+            delete[] bm;
         }
     };
 
