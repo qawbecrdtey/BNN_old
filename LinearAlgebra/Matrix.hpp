@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <random>
 
 namespace LinearAlgebra {
 
@@ -20,8 +21,23 @@ namespace LinearAlgebra {
         Matrix() : row(0), col(0), mat(nullptr) {}
 
         Matrix(std::size_t row, std::size_t col)
-                : row(row), col(col), mat(new T[row * col]()) {
+                : row(row), col(col), mat(new T[row * col]) {
             assert(row != 0 && col != 0);
+            std::random_device r;
+
+            std::default_random_engine e1(r());
+            std::uniform_real_distribution<T> uniform_dist(0, 2);
+            for(std::size_t i = 0; i < row * col; i++) {
+                mat[i] = (T)uniform_dist(e1);
+            }
+        }
+
+        Matrix(std::size_t row, std::size_t col, T constant)
+                : row(row), col(col), mat(new T[row * col]) {
+            assert(row != 0 && col != 0);
+            for(std::size_t i = 0; i < row * col; i++) {
+                mat[i] = constant;
+            }
         }
 
         Matrix(std::size_t row, std::size_t col, T *arr)
@@ -42,8 +58,6 @@ namespace LinearAlgebra {
         // copy constructor
         Matrix(Matrix &&matrix) noexcept
                 : row(matrix.row), col(matrix.col), mat(matrix.mat) {
-            delete[] matrix.mat;
-            matrix.mat = nullptr;
         }
 
         // copy assignment
@@ -170,7 +184,7 @@ namespace LinearAlgebra {
             return A.add(B);
         }
 
-        Matrix &operator+=(Matrix<T> const &A) {
+        Matrix &operator+=(Matrix<T> &&A) {
             return *this = *this + A;
         }
 
@@ -182,7 +196,7 @@ namespace LinearAlgebra {
             return B.add(a);
         }
 
-        Matrix &operator+=(T const &a) {
+        Matrix &operator+=(T &&a) {
             return *this = *this + a;
         }
 
@@ -190,7 +204,7 @@ namespace LinearAlgebra {
             return A.subtract(B);
         }
 
-        Matrix &operator-=(Matrix<T> const &A) {
+        Matrix &operator-=(Matrix<T> &&A) {
             return *this = *this - A;
         }
 
@@ -198,7 +212,7 @@ namespace LinearAlgebra {
             return A.subtract(b);
         }
 
-        Matrix &operator-=(T const &a) {
+        Matrix &operator-=(T &&a) {
             return *this = *this - a;
         }
 
@@ -210,7 +224,7 @@ namespace LinearAlgebra {
             return A.multiply(B);
         }
 
-        Matrix &operator*=(Matrix const &A) {
+        Matrix &operator*=(Matrix &&A) {
             return *this = *this * A;
         }
 
@@ -222,7 +236,7 @@ namespace LinearAlgebra {
             return B.multiply(a);
         }
 
-        Matrix &operator*=(T const &a) {
+        Matrix &operator*=(T &&a) {
             return *this = *this * a;
         }
 
@@ -230,7 +244,7 @@ namespace LinearAlgebra {
             return A.divide(b);
         }
 
-        Matrix operator/=(T const &a) {
+        Matrix operator/=(T &&a) {
             return *this = *this / a;
         }
 
@@ -239,7 +253,7 @@ namespace LinearAlgebra {
             return A.elementwise_multiply(B);
         }
 
-        virtual Matrix &elementwise_multiply(Matrix<T> const &A) {
+        virtual Matrix &elementwise_multiply(Matrix<T> &&A) {
             return *this = elementwise_multiplied(*this, A);
         }
 

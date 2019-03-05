@@ -49,12 +49,14 @@ namespace Net {
         // forward propagation
         virtual void forward(Matrix input) {
             assert(input.get_row() == layer_size[0] && input.get_col() == 1);
+            std::cout << "FORWARD : input is :\n" << input << '\n';
             layers[0] = input;
             for (nnint i = 0; i < layers_count - 2; i++) {
-                layers[i + 1] = inner_function(z[i] = weights[i].transposed() * layers[i] + bias[i]);
+                layers[i + 1] = inner_function(z[i] = (weights[i].transposed() * layers[i] + bias[i]));
             }
             layers[layers_count - 1] = outer_function(
-                    z[layers_count - 2] = weights[layers_count - 2].transposed() * layers[layers_count - 2] + bias[layers_count - 2]);
+                    z[layers_count - 2] = (weights[layers_count - 2].transposed() * layers[layers_count - 2] + bias[layers_count - 2]));
+            std::cout << "FORWARD : output is :\n" << layers[layers_count - 1] << '\n';
         }
 
         // get the result of forward propagation
@@ -115,22 +117,22 @@ namespace Net {
         void learn(nnint test_case_count, Matrix *input, Matrix *answer) {
             for (nnint i = 0; i < test_case_count; i++) {
                 forward(input[i]);
-                /*
+                std::cout << "weights and bias :\n";
                 for(nnint j = 0; j < layers_count - 1; j++) {
-                    std::cout << bias[j].transposed() << '\n';
+                    std::cout << '#' << j + 1 <<'\n';
+                    std::cout << weights[j] << '\n';
+                    std::cout << bias[j] << '\n';
                 }
-                std::cout << "#######################\n";
-                 */
                 backward(answer[i]);
             }
         }
 
         // print
-        void print_case(std::ostream &os, Matrix input, Matrix output) {
+        void print_case(std::ostream &os, Matrix input, Matrix expectedOutput) {
             os << "Input is :" << '\n' << input.transposed() << '\n';
             forward(input);
             os << "Output is :" << '\n' << layers[layers_count - 1].transposed() << '\n';
-            os << "Expected output is :" << '\n' << output.transposed() << '\n';
+            os << "Expected output is :" << '\n' << expectedOutput.transposed() << '\n';
         }
 
         // destructor

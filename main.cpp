@@ -7,9 +7,9 @@ int main() {
 	using NN = Net::NeuralNet<double>;
 	using nnint = std::size_t;
 
-	constexpr nnint SIZE = 4;
+	constexpr nnint SIZE = 2;
 	constexpr nnint testcase_num = 1<<SIZE;
-	constexpr nnint layer_count = 5;
+	constexpr nnint layer_count = 3;
     constexpr nnint output_size = SIZE + (SIZE > 1 ? 2 : 3);
 
 	auto *input = new Matrix[testcase_num];
@@ -35,7 +35,7 @@ int main() {
         }
     }
 
-    nnint layer_size[layer_count]{SIZE, SIZE + 3, SIZE + 4, SIZE + 3, output_size};
+    nnint layer_size[layer_count]{SIZE, SIZE + 3, output_size};
 
     NN nn(layer_count,
           layer_size,
@@ -43,6 +43,7 @@ int main() {
           [](Matrix matrix) -> Matrix {
               const nnint row = matrix.get_row();
               const nnint col = matrix.get_col();
+              /*
               const double max = matrix.get_max();
               Matrix M(row, col);
               double sum = 0;
@@ -57,6 +58,14 @@ int main() {
                   }
               }
               return M;
+               */
+              Matrix M(row, col);
+              for(nnint i = 0; i < row; i++) {
+                  for(nnint j = 0; j < col; j++) {
+                      M(i, j) = (matrix(i, j) > 0 ? matrix(i, j) : 0);
+                  }
+              }
+              return M;
           },
           // outer_function
           [](Matrix matrix) -> Matrix { return matrix; },
@@ -64,6 +73,7 @@ int main() {
           [](Matrix matrix) -> Matrix {
                 const nnint row = matrix.get_row();
                 const nnint col = matrix.get_col();
+                /*
                 const double max = matrix.get_max();
                 Matrix M(row, col);
                 double sum = 0;
@@ -75,6 +85,14 @@ int main() {
                 for(nnint i = 0; i < row; i++) {
                     for(nnint j = 0; j < col; j++) {
                         M(i, j) = exp(matrix(i, j) - max) / sum;
+                    }
+                }
+                return M;
+                 */
+                Matrix M(row, col);
+                for(nnint i = 0; i < row; i++) {
+                    for(nnint j = 0; j < col; j++) {
+                        M(i, j) = (matrix(i, j) > 0 ? 1 : (matrix(i, j) == 0 ? 0.5 : 0));
                     }
                 }
                 return M;
@@ -91,10 +109,10 @@ int main() {
               }
               return M;
           },
-          0.001
+          0.003
     );
 
-    for(nnint i = 0; i < 500; i++) {
+    for(nnint i = 0; i < 10; i++) {
         nn.learn(testcase_num, input, output);
     }
 
