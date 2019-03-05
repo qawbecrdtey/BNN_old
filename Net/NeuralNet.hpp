@@ -41,12 +41,9 @@ namespace Net {
                 layers[i] = Matrix(layer_size[i], 1);
             }
             for (nnint i = 0; i < layers_count - 1; i++) {
-                weights[i] = Matrix(layer_size[i], layer_size[i + 1]);
+                wm[i] = weights[i] = Matrix(layer_size[i], layer_size[i + 1]);
                 z[i] = Matrix(layer_size[i + 1], 1);
-                bias[i] = Matrix(layer_size[i + 1], 1);
-
-                wm[i] = weights[i];
-                bm[i] = bias[i];
+                bm[i] = bias[i] = Matrix(layer_size[i + 1], 1);
             }
         }
 
