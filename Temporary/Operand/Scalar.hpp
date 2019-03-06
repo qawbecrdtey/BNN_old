@@ -1,5 +1,5 @@
-#ifndef BNN_Scalar_hpp
-#define BNN_Scalar_hpp
+#ifndef BNN_TEMPORARY_Scalar_hpp
+#define BNN_TEMPORARY_Scalar_hpp
 
 #include <cstddef>
 #include "OperandBase.hpp"

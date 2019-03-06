@@ -1,5 +1,5 @@
-#ifndef BNN_Constant_hpp
-#define BNN_Constant_hpp
+#ifndef BNN_TEMPORARY_Constant_hpp
+#define BNN_TEMPORARY_Constant_hpp
 
 
 #include "OperandBase.hpp"

@@ -1,5 +1,5 @@
-#ifndef BNN_OperatorBase_hpp
-#define BNN_OperatorBase_hpp
+#ifndef BNN_TEMPORARY_OperatorBase_hpp
+#define BNN_TEMPORARY_OperatorBase_hpp
 
 #include <cstddef>
 #include <functional>

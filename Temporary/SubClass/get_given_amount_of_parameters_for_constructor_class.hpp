@@ -1,5 +1,5 @@
-#ifndef BNN_get_given_amount_of_parameters_class_hpp
-#define BNN_get_given_amount_of_parameters_class_hpp
+#ifndef BNN_TEMPORARY_get_given_amount_of_parameters_class_hpp
+#define BNN_TEMPORARY_get_given_amount_of_parameters_class_hpp
 
 #include <cstddef>
 #include <utility>
