@@ -106,12 +106,12 @@ namespace Net {
 
     public:
         // constructor
-        NeuralNet(nnint layers_count, nnint *layer_size, FunctionType inner_function,
+        NeuralNet(nnint layers_count, nnint const *layer_size, FunctionType inner_function,
                   FunctionType outer_function, FunctionType dinner_function,
                   FunctionType douter_function, T alpha = 0.01)
                 : layers_count(layers_count), layer_size(new nnint[layers_count]),
-                  inner_function(inner_function), outer_function(outer_function),
-                  dinner_function(dinner_function), douter_function(douter_function),
+                  inner_function(std::move(inner_function)), outer_function(std::move(outer_function)),
+                  dinner_function(std::move(dinner_function)), douter_function(std::move(douter_function)),
                   layers(new Matrix[layers_count]), weights(new Matrix[layers_count - 1]),
                   z(new Matrix[layers_count - 1]), bias(new Matrix[layers_count - 1]),
                   alpha(alpha), wm(new Matrix[layers_count - 1]), bm(new Matrix[layers_count - 1]) {
