@@ -6,6 +6,7 @@
 #include <cassert>
 #include <iostream>
 #include <random>
+#include "../Ops/Operators/Operator.hpp"
 
 namespace LinearAlgebra {
 
@@ -33,19 +34,20 @@ namespace LinearAlgebra {
             return Constant(row, col, static_cast<T>(1));
         }
 
-        Matrix(std::size_t row, std::size_t col) // TODO : This is default constructor, NOT random matrix generator
+        Matrix(std::size_t row, std::size_t col)
+                : row(row), col(col), mat(new T[row * col]) {}
+
+        Matrix(std::size_t row, std::size_t col, std::random_device &rd, T mean = 0, T stdv = 1) // TODO : This is default constructor, NOT random matrix generator
                 : row(row), col(col), mat(new T[row * col]) {
             assert(row != 0 && col != 0);
-            std::random_device r;
-
-            std::default_random_engine e1(r());
-            std::normal_distribution<T> uniform_dist(0, 0.3); // TODO : I think random generator is a choice of clients
+            std::default_random_engine e1(rd());
+            std::normal_distribution<T> normal_dist(mean, stdv); // TODO : I think random generator is a choice of clients
             for(std::size_t i = 0; i < row * col; i++) {
-                mat[i] = (T)uniform_dist(e1);
+                mat[i] = static_cast<T>(normal_dist(e1));
             }
         }
 
-        Matrix(std::size_t row, std::size_t col, T constant)
+        explicit Matrix(std::size_t row, std::size_t col, T constant)
                 : row(row), col(col), mat(new T[row * col]) {
             assert(row != 0 && col != 0);
             for(std::size_t i = 0; i < row * col; i++) {
@@ -53,7 +55,7 @@ namespace LinearAlgebra {
             }
         }
 
-        Matrix(std::size_t row, std::size_t col, T *arr)
+        explicit Matrix(std::size_t row, std::size_t col, T *arr)
                 : row(row), col(col), mat(new T[row * col]) {
             assert(row != 0 && col != 0);
             std::size_t const size = row * col;
@@ -90,6 +92,13 @@ namespace LinearAlgebra {
             row = matrix.row, col = matrix.col;
             std::swap(mat, matrix.mat);
             return *this;
+        }
+
+    public:
+        // compute function
+        template<typename FuncOut, std::size_t size, typename ...Ts>
+        friend FuncOut compute(Operators::OperatorBase<FuncOut, size> const &op, Ts &&...Is) {
+            return op(std::forward<Ts>(Is)...);
         }
 
     protected:
