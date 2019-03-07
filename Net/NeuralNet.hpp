@@ -3,18 +3,50 @@
 
 #include <functional>
 #include "../LinearAlgebra/Matrix.hpp"
+#include <memory>
 
 namespace Net {
 
     template<typename T>
-    class NeuralNet {
+    struct NetConfigs {
         using Matrix = LinearAlgebra::Matrix<T>;
-        using FunctionType = std::function<Matrix(Matrix)>; // TODO : Please avoid "Pass-by-Value". Too much overhead.
+        using FunctionType = std::function<Matrix(Matrix const &)>;
         using nnint = std::size_t;
 
         // (input, hidden and output) layers, weights, layers before passing activation function
         Matrix *layers, *weights, *z;
-        Matrix *wm, *bm; // TODO : How about separating NN and optimizers?
+        Matrix *wm, *bm;
+
+        // bias for each layer except the output
+        Matrix *bias;
+
+        // Function applied to layers except output layer
+        FunctionType inner_function;
+        // Function applied to output layer
+        FunctionType outer_function;
+        // derivatives of functions above
+        FunctionType dinner_function;
+        FunctionType douter_function;
+
+        // number of layers, size of each layer
+        // number of weights and z is layers_count - 1
+        nnint layers_count, *layer_size;
+
+        // learning rate
+        T alpha;
+    };
+
+    template<typename T>
+    class NeuralNet {
+        using Matrix = LinearAlgebra::Matrix<T>;
+        using FunctionType = std::function<Matrix(Matrix const &)>;
+        using nnint = std::size_t;
+
+        std::unique_ptr<NetConfigs<T> > netConfigs;
+
+        // (input, hidden and output) layers, weights, layers before passing activation function
+        Matrix *layers, *weights, *z;
+        Matrix *wm, *bm;
 
         // bias for each layer except the output
         Matrix *bias;
