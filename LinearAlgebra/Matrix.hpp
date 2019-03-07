@@ -21,27 +21,14 @@ namespace LinearAlgebra {
         // constructors
         Matrix() : row(0), col(0), mat(nullptr) {}
 
-        // TODO : PLEASE USE STATIC CONSTRUCTORS. Below is the example.
-        static Matrix<T> Constant(std::size_t row, std::size_t col, T constant) {
-            Matrix<T> M(row, col);
-            std::fill(M.mat, M.mat + row * col, constant);
-            return M;
-        }
-        static Matrix<T> Zeros(std::size_t row, std::size_t col) {
-            return Constant(row, col, static_cast<T>(0));
-        }
-        static Matrix<T> Ones(std::size_t row, std::size_t col) {
-            return Constant(row, col, static_cast<T>(1));
-        }
-
         Matrix(std::size_t row, std::size_t col)
                 : row(row), col(col), mat(new T[row * col]) {}
 
-        Matrix(std::size_t row, std::size_t col, std::random_device &rd, T mean = 0, T stdv = 1) // TODO : This is default constructor, NOT random matrix generator
+        Matrix(std::size_t row, std::size_t col, std::random_device &rd, T mean = 0, T stdv = 1)
                 : row(row), col(col), mat(new T[row * col]) {
             assert(row != 0 && col != 0);
             std::default_random_engine e1(rd());
-            std::normal_distribution<T> normal_dist(mean, stdv); // TODO : I think random generator is a choice of clients
+            std::normal_distribution<T> normal_dist(mean, stdv);
             for(std::size_t i = 0; i < row * col; i++) {
                 mat[i] = static_cast<T>(normal_dist(e1));
             }
@@ -62,6 +49,19 @@ namespace LinearAlgebra {
             for (std::size_t i = 0; i < size; i++) {
                 mat[i] = arr[i];
             }
+        }
+
+        // TODO : PLEASE USE STATIC CONSTRUCTORS. Below is the example.
+        static Matrix<T> Constant(std::size_t row, std::size_t col, T constant) {
+            Matrix<T> M(row, col);
+            std::fill(M.mat, M.mat + row * col, constant);
+            return M;
+        }
+        static Matrix<T> Zeros(std::size_t row, std::size_t col) {
+            return Constant(row, col, static_cast<T>(0));
+        }
+        static Matrix<T> Ones(std::size_t row, std::size_t col) {
+            return Constant(row, col, static_cast<T>(1));
         }
 
         // copy constructor

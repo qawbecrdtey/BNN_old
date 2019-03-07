@@ -37,11 +37,12 @@ namespace Net {
     protected:
         virtual void init(nnint const *layer_size) {
             std::copy(layer_size, layer_size + layers_count, this->layer_size);
+            std::random_device rd;
             for (nnint i = 0; i < layers_count; i++) {
                 layers[i] = Matrix(layer_size[i], 1);
             }
             for (nnint i = 0; i < layers_count - 1; i++) {
-                wm[i] = weights[i] = Matrix(layer_size[i], layer_size[i + 1]);
+                wm[i] = weights[i] = Matrix(layer_size[i], layer_size[i + 1], rd, 0, 0.3);
                 z[i] = Matrix(layer_size[i + 1], 1);
                 bm[i] = bias[i] = Matrix(layer_size[i + 1], 1);
             }
