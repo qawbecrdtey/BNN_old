@@ -7,7 +7,7 @@ int main() {
 	using NN = Net::NeuralNet<double>;
 	using nnint = std::size_t;
 
-	constexpr nnint SIZE = 2;
+	constexpr nnint SIZE = 3;
 	constexpr nnint testcase_num = 1<<SIZE;
 	constexpr nnint layer_count = 3;
     constexpr nnint output_size = SIZE + (SIZE > 1 ? 2 : 3);
@@ -123,7 +123,7 @@ int main() {
           0.003
     );
 
-    for(nnint i = 0; i < 500; i++) {
+    for(nnint i = 0; i < 700; i++) {
         std::cout << i << " : " << nn.learn(testcase_num, input, output) << '\n';
     }
 
